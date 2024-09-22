@@ -5,7 +5,7 @@
 
 void getNewPath(int *path, int n)
 {
-   int i, j, temp;
+   int i, j;
     for(i = n - 2; i > 0; i--)
     {if (path[i] < path[i+1])
     {
@@ -56,9 +56,10 @@ bool inCycle(int *path, int k, int index)
 
 int getMinElement(int *row, int *path, int n, int position)
 {
-    int minInd=0;
-    //while (InCycle())
-    row[0]=1000;
+    int minInd=1;
+    while (!inCycle(path, position, minInd))
+        ++minInd;
+    //row[0]=1000;
     for (int i = 1; i <= n ; i++)
     {
         if (row[minInd] > row[i] && row[i] != -1 && inCycle(path, position, i)) minInd = i;
@@ -81,7 +82,7 @@ int greedyAlgorithm(int **matrix, int *path, int n)
 
 int main()
 {
-    int numberOfTowns, startTown, i, j, p = 1, minCost = 0, maxCost = 0, gminCost;
+    int numberOfTowns, startTown, i, p = 1, minCost = 0, maxCost = 0, gminCost;
     std::cout << "Введите количество городов, которые необходимо посетить :";
     std::cin >> numberOfTowns;
     numberOfTowns=std::abs(numberOfTowns);
