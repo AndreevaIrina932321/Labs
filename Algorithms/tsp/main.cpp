@@ -1,36 +1,46 @@
 #include <iostream>
 #include <chrono>
-#include <time.h>
+#include <ctime>
 #include "generalfunctions.h"
 
-void getNewPath(int *path, int n)
+bool getNewPath(int *path, int n)
 {
-   int i, j;
+    int i, j;
     for(i = n - 2; i > 0; i--)
-    {if (path[i] < path[i+1])
     {
-        for(j = n - 1; j > i; j--)
+        if (path[i] < path[i + 1])
         {
-            if(path[i] < path[j])
+            for(j = n - 1; j > i; j--)
             {
-                Swap(path[i], path[j]);
-                break;
+                if(path[i] < path[j])
+                {
+                    Swap(path[i], path[j]);
+                    break;
                 }
+            }
+            break;
         }
-        break;
-    }}
+    }
     bubbleSortUp(path, n, i + 1);
-    outputPath(path, n);
+    if (i == 0)
+        return 0;
+    else
+        return 1;
 }
 
 
-void djkstraAlgorithm(int **matrix, int *path, int *finalPath, int &minC, int &maxC, int k, int n)
+void djkstraAlgorithm(int **matrix, int *path, int *finalPath, int &minC, int &maxC, int n, bool flagD = 1)
 {
     int cost;
-    for (int i = 0; i < k - 1; i++)
+    while (getNewPath(path, n))
     {
-        getNewPath(path, n);
         cost = getCostOfPath(matrix, n, path);
+        if (flagD)
+        {
+            outputPath(path, n);
+            std::cout << "Стоимость: " << cost << std::endl;
+        }
+
         if (maxC <= cost)
         {
             maxC = cost;
@@ -56,13 +66,12 @@ bool inCycle(int *path, int k, int index)
 
 int getMinElement(int *row, int *path, int n, int position)
 {
-    int minInd=1;
+    int minInd = 1;
     while (!inCycle(path, position, minInd))
         ++minInd;
-    //row[0]=1000;
-    for (int i = 1; i <= n ; i++)
+    for (int i = minInd + 1; i <= n ; i++)
     {
-        if (row[minInd] > row[i] && row[i] != -1 && inCycle(path, position, i)) minInd = i;
+        if (row[minInd] > row[i] && inCycle(path, position, i)) minInd = i;
     }
     return minInd;
 }
@@ -80,49 +89,66 @@ int greedyAlgorithm(int **matrix, int *path, int n)
     return cost;
 }
 
-int main()
+
+void getAllSolutions(int **matCost, int *path, int *finalPath, int numberOfTowns, int startTown)
 {
-    int numberOfTowns, startTown, i, p = 1, minCost = 0, maxCost = 0, gminCost;
-    std::cout << "Введите количество городов, которые необходимо посетить :";
-    std::cin >> numberOfTowns;
-    numberOfTowns=std::abs(numberOfTowns);
-    if (numberOfTowns == 0)
-        ++numberOfTowns;
-    do {
-    std::cout << "Введите номер начального города (он не может быть больше их количества):";
-    std::cin >> startTown;} while (startTown>numberOfTowns || startTown<1);
-    int *path = new int[numberOfTowns];
-    int *finalPath = new int [numberOfTowns];
-    int **matCost = new int* [numberOfTowns+1];
-    for (i = 0; i <= numberOfTowns; i++)
-        matCost[i] = new int [numberOfTowns+1];
-    randInput(matCost, numberOfTowns);
-    setPath(path, finalPath, startTown, numberOfTowns);
-    //inputMatrix(matCost, numberOfTowns);
-    outputPath(path, numberOfTowns);
+    int minCost = 0, maxCost = 0, gminCost;
+    float accuracy;
+    //outputPath(path, numberOfTowns);
     minCost = getCostOfPath(matCost, numberOfTowns, path);
     maxCost = minCost;
-    for (i = 1; i < numberOfTowns; i++) p *= i;
     auto start = std::chrono::high_resolution_clock::now();
-    djkstraAlgorithm(matCost, path, finalPath, minCost, maxCost, p, numberOfTowns);
+    djkstraAlgorithm(matCost, path, finalPath, minCost, maxCost, numberOfTowns, 0);
     auto end = std::chrono::high_resolution_clock::now();
     outputMatrix(matCost, numberOfTowns);
     std::cout << "Минимальная стоимость: " << minCost << std::endl;
     std::cout << "Максимальная стоимость: " << maxCost << std::endl;
     std::cout << "Оптимальный путь: ";
     outputPath(finalPath, numberOfTowns);
-    auto diff = std::chrono::duration_cast<std::chrono::milliseconds> (end - start);
-    std::cout << "Time " << diff.count() << "ms\n";
+    std::chrono::duration<double> diff = end - start;
+    std::cout << "Time " << diff.count() << "s\n";
     start = std::chrono::high_resolution_clock::now();
     gminCost = greedyAlgorithm(matCost, finalPath, numberOfTowns);
     end = std::chrono::high_resolution_clock::now();
     std::cout << "Минимальная стоимость: " << gminCost << std::endl;
     std::cout << "Оптимальный путь: ";
     outputPath(finalPath, numberOfTowns);
-    diff = std::chrono::duration_cast<std::chrono::milliseconds> (end - start);
-    std::cout << "Time " << diff.count() << "ms\n";
+    diff = end - start;
+    std::cout << "Time " << diff.count() << "s\n";
+    accuracy = (1 - (gminCost - minCost) / static_cast<float>(maxCost - minCost)) * 100;
+    std::cout << "Качество решения: " << accuracy << '%' << std::endl;
+}
+
+int main()
+{
+    int numberOfTowns, startTown, i, j;
+    std::cout << "Введите количество городов, которые необходимо посетить :";
+    std::cin >> numberOfTowns;
+    numberOfTowns = std::abs(numberOfTowns);
+    if (numberOfTowns == 0)
+        ++numberOfTowns;
+    do
+    {
+        std::cout << "Введите номер начального города (он не может быть больше их количества):";
+        std::cin >> startTown;
+    }
+    while (startTown > numberOfTowns || startTown < 1);
+
+    int *path = new int[numberOfTowns];
+    int *finalPath = new int [numberOfTowns];
+    int **matCost = new int* [numberOfTowns + 1];
     for (i = 0; i <= numberOfTowns; i++)
-        delete [] matCost[numberOfTowns+1];
+        matCost[i] = new int [numberOfTowns + 1];
+    srand(time(0));
+    for (j = 0; j < 4; j++)
+    {
+        randInput(matCost, numberOfTowns);
+        setPath(path, finalPath, startTown, numberOfTowns);
+        getAllSolutions(matCost, path, finalPath, numberOfTowns, startTown);
+    }
+    for (i = 0; i <= numberOfTowns; i++)
+        delete [] matCost[numberOfTowns + 1];
+    delete [] matCost;
     delete [] path;
     delete [] finalPath;
     return 0;

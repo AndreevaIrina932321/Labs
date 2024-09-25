@@ -3,12 +3,15 @@
 
 void Swap(int &x, int &y)
 {
-    int tmp = x; x = y; y = tmp;
+    int tmp = x;
+    x = y;
+    y = tmp;
 }
 
 void getCopyArray(int *arr1, int *arr2, int n)
 {
-    for(int i = 0; i < n; i++) arr2[i] = arr1[i];
+    for(int i = 0; i < n; i++)
+        arr2[i] = arr1[i];
 }
 
 void bubbleSortUp(int *a, int n, int g)
@@ -26,16 +29,17 @@ void randInput(int **matrix, int n, int left = 1, int right = 20)
     int i, j;
     matrix[0][0] = 0;
     for (i = 1; i <= n; i++)
-        matrix[0][i]= i;
+        matrix[0][i] = i;
     for (i = 1; i <= n; i++)
         matrix[i][0] = i;
-    srand(time(0));
     for(i = 1; i <= n; i++)
-    for(j = 1; j <= n; j++)
-    {   if (i == j) matrix[i][j] = 0;
-        else
-            matrix[i][j] = rand()%right + left;
-            }
+        for(j = 1; j <= n; j++)
+        {
+            if (i == j)
+                matrix[i][j] = 0;
+            else
+                matrix[i][j] = rand() % right + left;
+        }
 }
 
 void inputMatrix(int **matrix, int n)
@@ -43,19 +47,21 @@ void inputMatrix(int **matrix, int n)
     int i, j;
     matrix[0][0] = 0;
     for (i = 1; i <= n; i++)
-        matrix[0][i]= i;
+        matrix[0][i] = i;
     for (i = 1; i <= n; i++)
         matrix[i][0] = i;
     for(i = 1; i <= n; i++)
-    for(j = 1; j <= n; j++)
-    {std::cin >> matrix[i][j];}
+        for(j = 1; j <= n; j++)
+        {
+            std::cin >> matrix[i][j];
+        }
 }
 
 void outputMatrix(int **matrix, int n)
 {
     for (int i = 0; i <= n; i++)
     {
-        for (int j=0; j <= n; j++)
+        for (int j = 0; j <= n; j++)
             std::cout << matrix[i][j] << '\t';
         std::cout << std::endl;
     }
@@ -70,9 +76,9 @@ void outputPath(int *path, int n)
 
 int getCostOfPath(int **matrix, int n, int *path)
 {
-    int k, cost=0;
-    for(k = 0; k < n - 1; k++) cost+=matrix[path[k]][path[k + 1]];
-    std::cout << "Стоимость: " << cost << std::endl;
+    int k, cost = 0;
+    for(k = 0; k < n - 1; k++)
+        cost += matrix[path[k]][path[k + 1]];
     return cost;
 }
 
@@ -84,11 +90,9 @@ void setPath(int *path, int *finalPath, int startTown, int numberOfTowns)
     finalPath[0] = startTown;
     for (i = 1, j = 1; i < numberOfTowns; i++, j++)
     {
-        if (i == startTown) j++;
-            {
-                path[i] = j;
-                finalPath[i] = j;
-            }
-
+        if (i == startTown)
+            j++;
+        path[i] = j;
+        finalPath[i] = j;
     }
 }
