@@ -4,8 +4,11 @@
 
 int main()
 {
-	Fraction first(35, 21), second(2,7), result;
+	Fraction first(10, 5), second(2,7), result;
+	first.reduce();
+	first.print();
 	result = first+second;
+	first.print();
 	result.print();
 	result = first-second;
 	result.print();

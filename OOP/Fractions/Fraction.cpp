@@ -38,22 +38,22 @@ Fraction Fraction::operator/(const Fraction &other) const
     return divOfFractions;
 }
 
-bool Fraction::operator>(const Fraction &other)
+bool Fraction::operator>(const Fraction &other) const
 {
     return (numerator * other.denominator > denominator * other.numerator);
 }
 
-bool Fraction::operator<(const Fraction &other)
+bool Fraction::operator<(const Fraction &other) const
 {
     return (numerator * other.denominator < denominator * other.numerator);
 }
 
-bool Fraction::operator==(const Fraction &other)
+bool Fraction::operator==(const Fraction &other) const
 {
     return (numerator * other.denominator == denominator * other.numerator);
 }
 
-bool Fraction::operator!=(const Fraction &other)
+bool Fraction::operator!=(const Fraction &other) const
 {
     return (!operator==(other));
 }
@@ -71,17 +71,19 @@ void Fraction::reduce()
     numerator /= nod;
 }
 
-int Fraction::getIntegerPart()
+int Fraction::getIntegerPart() const
 {
     int integer;
-    if (denominator == 1) integer = numerator;
+    if (denominator == 1)
+        integer = numerator;
     else integer = numerator / denominator;
     return integer;
 }
 
-void Fraction::printProperForm()
+void Fraction::printProperForm() const
 {
-    if (denominator == 1) std::cout << numerator;
+    if (denominator == 1)
+        std::cout << numerator;
     else if (numerator > denominator) std::cout << numerator / denominator << '+'
                 << '(' << numerator % denominator << '/' << denominator << ')' << std::endl;
     else print();
