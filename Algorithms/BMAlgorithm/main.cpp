@@ -4,7 +4,7 @@
 
 void outputVector(const std::vector<int> &v)
 {
-    for(int i; i < v.size(); i++)
+    for(int i = 0; i < v.size(); i++)
     {
         std::cout << v[i] << " ";
     }
