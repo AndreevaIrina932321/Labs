@@ -1,5 +1,6 @@
 #include <iostream>
 #include <assert.h>
+#include <algorithm>
 #include "Array.h"
 
 Array::Array(const int size, const int value)
@@ -77,7 +78,7 @@ void Array::swap(Array& other) noexcept
     std::swap(m_array, other.m_array);
 }
 
-int Array::findElement(const int sample) const
+int Array::find(const int sample) const
 {
     for (int i = 0; i < m_size; ++i)
     {
@@ -107,7 +108,25 @@ void Array::print() const
     std::cout << std::endl;
 }
 
-void Array::insertSort()
+void Array::input()
+{
+    int sizeOfArray;
+    std::cout << "Введите размер массива: ";
+    std::cin >> sizeOfArray;
+    if (sizeOfArray < 0)
+    {
+         std::cerr << "Array::Array: size is negative, invert...\n";
+         sizeOfArray = -sizeOfArray;
+    }
+    m_size = sizeOfArray;
+    std::cout << "Введите зеачения элементов массива: ";
+    for (int i = 0; i < m_size; ++i)
+    {
+        std::cin >> m_array[i];
+    }
+}
+
+void Array::sort()
 {
     int temp, j;
     for (int i = 1; i < m_size; i++)
@@ -121,7 +140,7 @@ void Array::insertSort()
     }
 }
 
-bool Array::insertElement(const int index, const int &value)
+bool Array::insert(const int index, const int &value)
 {
     Array arrCopy(m_size + 1);
     int i;
@@ -145,14 +164,14 @@ bool Array::insertElement(const int index, const int &value)
 
 bool Array::deleteIndex(const int index)
 {
-    Array arrCopy(m_size - 1);
+    //Array arrCopy(m_size - 1);
     int i;
     if (index >= m_size || index < 0)
     {
         std::cerr << "Array::deleteIndex: index is incorrect...\n";
         return false;
     }
-    for (i = 0; i < index; i++)
+    /*for (i = 0; i < index; i++)
     {
         arrCopy.m_array[i] = m_array[i];
     }
@@ -160,13 +179,18 @@ bool Array::deleteIndex(const int index)
     {
         arrCopy.m_array[i] = m_array[i + 1];
     }
-    swap(arrCopy);
+    swap(arrCopy);*/
+    for (i = index; i < m_size; ++i)
+    {
+        m_array[i] = m_array[i + 1];
+    }
+    --m_size;
     return true;
 }
 
 bool Array::deleteFirst(const int &value)
 {
-    int index = findElement(value);
+    int index = find(value);
     if (index >= 0)
     {
         return deleteIndex(index);
@@ -174,7 +198,7 @@ bool Array::deleteFirst(const int &value)
     return false;
 }
 
-Array &Array::deleteAll(const int &value)
+Array &Array::erase(const int &value)
 {
     bool inArray{true};
     do
@@ -185,7 +209,7 @@ Array &Array::deleteAll(const int &value)
     return *this;
 }
 
-int Array::findMaxElement()
+int Array::findMaxElement() const
 {
     int maxValue = m_array[0];
     for (int i = 1; i < m_size; ++i)
@@ -196,6 +220,19 @@ int Array::findMaxElement()
             }
     }
     return maxValue;
+}
+
+int Array::findMinElement() const
+{
+    int minValue = m_array[0];
+    for (int i = 1; i < m_size; ++i)
+    {
+        if (minValue > m_array[i])
+            {
+                minValue = m_array[i];
+            }
+    }
+    return minValue;
 }
 
 Array &Array::operator=(const Array &other)
@@ -241,13 +278,13 @@ int &Array::operator[](const int index)
 Array Array::operator+(const int &value) const
 {
     Array sum(*this);
-    sum.insertElement(m_size, value);
+    sum.insert(m_size, value);
     return sum;
 }
 
 void Array::operator+=(const int &value)
 {
-    insertElement(m_size, value);
+    insert(m_size, value);
 }
 
 void Array::operator+=(const Array &other)
@@ -273,7 +310,7 @@ Array Array::operator+(const Array &other) const
     return sum;
 }
 
-bool Array::operator==(const Array &other)
+bool Array::operator==(const Array &other) const
 {
     if (m_size != other.m_size)
     {
@@ -289,10 +326,63 @@ bool Array::operator==(const Array &other)
     return true;
 }
 
-bool Array::operator!=(const Array &other)
+bool Array::operator!=(const Array &other) const
 {
     return (!operator==(other));
 }
 
+Array::iterator Array::begin()
+{
+    return m_array;
+}
 
+Array::iterator Array::end()
+{
+    return m_array + m_size;
+}
 
+const Array::iterator Array::begin() const
+{
+    return m_array;
+}
+
+const Array::iterator Array::end() const
+{
+    return m_array + m_size;
+}
+
+Array &Array::erase(Array::iterator left, Array::iterator right, const int &value)
+{
+    iterator newEnd;
+    if (left < begin() || right > end())
+    {
+        std::cerr << "Array::delete: borders is incorrect...\n";
+        return *this;
+    }
+    newEnd = std::remove(left, right, value);
+    m_size = newEnd - begin();
+    return *this;
+}
+
+bool Array::insert(const Array::iterator position, const int &value)
+{
+    if (position < begin() || position >= end())
+    {
+        std::cerr << "Array::insert: iterator is incorrect...\n";
+        false;
+    }
+    Array copyArr(m_size + 1);
+    iterator it, otherIt = copyArr.begin();
+    for (it = begin(); it < position; ++it, ++otherIt)
+    {
+        *otherIt = *it;
+    }
+    *otherIt = value;
+    ++otherIt;
+    while (it != end())
+    {
+        *otherIt = *it;
+    }
+    swap(copyArr);
+    return true;
+}
