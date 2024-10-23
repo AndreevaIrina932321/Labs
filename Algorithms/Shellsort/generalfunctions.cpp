@@ -1,4 +1,8 @@
 #include <fstream>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <sstream>
 
 void randInput(int *arr, int sizeOfArray, int left = -10, int right = 10)
 {
@@ -11,7 +15,7 @@ void randInput(int *arr, int sizeOfArray, int left = -10, int right = 10)
 
 void writeArray(int *arr, int sizeOfArray, std::ofstream &file)
 {
-    if (file.is_open())
+    if (file.is_open()) //try catch
     {
         for (int i = 0; i < sizeOfArray; ++i)
         {
@@ -23,9 +27,9 @@ void writeArray(int *arr, int sizeOfArray, std::ofstream &file)
 
 void saveArrays()
 {
-    const int size1 = 5, size2 = 8, size3 = 10;
+    const int size1 = 10000, size2 = 100000, size3 = 1000000;
     int range = 10;
-    std::ofstream file("arrays.txt", std::ios_base::out);
+    std::ofstream fileOut("arrays.txt", std::ios_base::out);
 
     int *arr1 = new int [size1];
     int *arr2 = new int [size2];
@@ -33,15 +37,44 @@ void saveArrays()
     for (int i = 0; i < 3; ++i)
     {
         randInput(arr1, size1, -range, range);
-        writeArray(arr1, size1, file);
+        writeArray(arr1, size1, fileOut);
         randInput(arr2, size2, -range, range);
-        writeArray(arr2, size2, file);
+        writeArray(arr2, size2, fileOut);
         randInput(arr3, size3, -range, range);
-        writeArray(arr3, size3, file);
+        writeArray(arr3, size3, fileOut);
         range *= 100;
     }
-    file.close();
+    fileOut.close();
     delete [] arr1;
     delete [] arr2;
     delete [] arr3;
+}
+
+bool isSorted(const std::vector<int> &arr)
+{
+    int arraySize = arr.size();
+    for (int i = 0; i < arraySize - 1; ++i)
+    {
+        if (arr[i] > arr[i + 1])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void readArray(std::vector<int> &arr, std::ifstream &fileIn) //Нужно переписать
+{
+    std::string line;
+    std::string number;
+    arr.clear();
+    if (fileIn.is_open()) //try catch
+    {
+        std::getline(fileIn, line);
+        std::stringstream strStream(line);
+        while (std::getline(strStream, number, ' '))
+        {
+            arr.push_back(atoi(number.c_str()));
+        }
+    }
 }
