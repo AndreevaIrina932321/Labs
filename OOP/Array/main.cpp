@@ -3,12 +3,13 @@
 
 int main()
 {
-    Array arr0(6, 2), arr1(3, 3);
-    arr0.print();
-    for (int i = arr0.getSize() - 1; i >= 0; --i)
-        arr0[arr0.getSize() - 1 - i]= i;
-    arr0.print();
+    Array<int> arr0(4, 5);
+    std::cin >> arr0;
+    std::cout << arr0;
+    /*for (int i = arr0.getSize() - 1; i >= 0; --i)
+        arr0[arr0.getSize() - 1 - i]= i;*/
+    std::cout << arr0;
     arr0.erase(arr0.begin(), arr0.end(), 2);
-    arr0.print();
+    std::cout << arr0;
     return 0;
 }
