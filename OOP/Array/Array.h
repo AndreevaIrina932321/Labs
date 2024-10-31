@@ -37,13 +37,13 @@ public:
 
     Array &operator=(const Array &other);
     Array& operator=(Array&& other) noexcept;
-    const int &operator[](const int index) const;
-    int &operator[](const int index);
+    const ItemType &operator[](const int index) const;
+    ItemType &operator[](const int index);
 
     Array operator+(const ItemType &value) const;
-    void operator+=(const ItemType &value);
+    Array operator+=(const ItemType &value);
     Array operator+(const Array &other) const;
-    void operator+=(const Array &other);
+    Array operator+=(const Array &other);
 
     bool operator==(const Array &other) const;
     bool operator!=(const Array &other) const;
@@ -204,16 +204,21 @@ template <typename ItemType>
 bool Array<ItemType>::deleteIndex(const int index)
 {
     int i;
+    Array arrCopy(m_size - 1);
     if (index >= m_size || index < 0)
     {
         std::cerr << "Array::deleteIndex: index is incorrect...\n";
         return false;
     }
+    for (i = 0; i < index; ++i)
+    {
+        arrCopy[i] = m_array[i];
+    }
     for (i = index; i < m_size; ++i)
     {
         m_array[i] = m_array[i + 1];
     }
-    --m_size;
+    swap(arrCopy);
     return true;
 }
 
@@ -299,14 +304,14 @@ Array<ItemType>& Array<ItemType>::operator=(Array&& other) noexcept
 }
 
 template <typename ItemType>
-const int &Array<ItemType>::operator[](const int index) const
+const ItemType &Array<ItemType>::operator[](const int index) const
 {
     assert(index >= 0 && index < m_size);
     return m_array[index];
 }
 
 template <typename ItemType>
-int &Array<ItemType>::operator[](const int index)
+ItemType &Array<ItemType>::operator[](const int index)
 {
     assert(index >= 0 && index < m_size);
     return m_array[index];
@@ -321,13 +326,14 @@ Array<ItemType> Array<ItemType>::operator+(const ItemType &value) const
 }
 
 template <typename ItemType>
-void Array<ItemType>::operator+=(const ItemType &value)
+Array<ItemType> Array<ItemType>::operator+=(const ItemType &value)
 {
     insert(m_size, value);
+    return *this;
 }
 
 template <typename ItemType>
-void Array<ItemType>::operator+=(const Array &other)
+Array<ItemType> Array<ItemType>::operator+=(const Array &other)
 {
     Array sum(m_size + other.m_size);
     int i;
@@ -341,6 +347,7 @@ void Array<ItemType>::operator+=(const Array &other)
         sum.m_array[j] = other.m_array[i];
     }
     swap(sum);
+    return *this;
 }
 
 template <typename ItemType>
@@ -356,7 +363,7 @@ bool Array<ItemType>::operator==(const Array &other) const
 {
     if (m_size != other.m_size)
     {
-        return true;
+        return false;
     }
     for (int i = 0; i < m_size; ++i)
     {
@@ -401,14 +408,20 @@ const typename Array<ItemType>::iterator Array<ItemType>::end() const
 template <typename ItemType>
 Array<ItemType> &Array<ItemType>::erase(Array<ItemType>::iterator left, Array<ItemType>::iterator right, const ItemType &value)
 {
-    iterator newEnd;
+    iterator newEnd, copyIndex;
     if (left < begin() || right > end())
     {
         std::cerr << "Array::delete: borders is incorrect...\n";
         return *this;
     }
     newEnd = std::remove(left, right, value);
-    m_size = newEnd - begin();
+    Array arrCopy(newEnd - begin());
+    int i = 0;
+    for (copyIndex = arrCopy.begin(); copyIndex < arrCopy.end(); ++copyIndex, ++i)
+    {
+        *copyIndex = *(begin() + i);
+    }
+    swap(arrCopy);
     return *this;
 }
 
@@ -458,16 +471,11 @@ std::ostream &operator<<(std::ostream &out, const Array<T> &arr)
 template <typename T>
 std::istream& operator>>(std::istream &in, Array<T> &arr)
 {
-    int sizeOfArray;
-    std::cout << "Введите размер массива: ";
-    in >> sizeOfArray;
-    if (sizeOfArray < 0)
+    if (arr.m_size < 0)
     {
          std::cerr << "Array::Array: size is negative, invert...\n";
-         sizeOfArray = -sizeOfArray;
+         arr.m_size = -arr.m_size;
     }
-    arr.m_size = sizeOfArray;
-    std::cout << "Введите зеачения элементов массива: ";
     for (int i = 0; i <arr.m_size; ++i)
     {
         in >> arr.m_array[i];
