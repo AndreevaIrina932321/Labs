@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <algorithm>
 #include <vector>
 #include <fstream>
 #include <assert.h>
@@ -8,10 +9,11 @@
 
 void setGapSequenceShell(std::vector<int> &gap, int arrSize)
 {
-    for (int gapValue = 1; gapValue <= arrSize / 2 ; gapValue *= 2)
+    for (int gapValue = arrSize / 2; gapValue >= 1 ; gapValue /= 2)
     {
         gap.push_back(gapValue);
     }
+    std::reverse(gap.begin(), gap.end());
 }
 
 void setGapSequenceKnuth(std::vector<int> &gap, int arrSize)
@@ -29,7 +31,7 @@ void setGapSequenceKnuth(std::vector<int> &gap, int arrSize)
 void setGapSequenceSedgewick(std::vector<int> &gap, int arrSize)
 {
     int gapValue = 1;
-    for (int j = 0; gapValue < arrSize; ++j)
+    for (int j = 0; gapValue < arrSize / 3; ++j)
     {
         if (j % 2)
         {
@@ -40,10 +42,6 @@ void setGapSequenceSedgewick(std::vector<int> &gap, int arrSize)
             gapValue = 9 * std::pow(2 , j) - 9 * std::pow(2, j / 2) + 1;
         }
         gap.push_back(gapValue);
-    }
-    if (gap[gap.size() - 1] >= arrSize)
-    {
-        gap.erase(gap.end() - 1);
     }
 }
 
@@ -85,13 +83,13 @@ double getTimeOfSort(std::vector<int> &arr, std::vector<int> &arrCopy, std::vect
 
 int main()
 {
-    std::ifstream fileIn("arrays.txt");
+    std::ifstream fileIn("arrays.txt", std::ios_base::in);
     std::vector<int> arr;
+    arr.reserve(1000000);
     double averageShellTime = 0, averageKnuthTime = 0, averageSedgewickTime = 0;
-    for (int j = 0; j < 9; ++j)
+    while (readArray(arr, fileIn))
     {
         int i;
-        readArray(arr, fileIn);
         for (i = 0 ; i < 3; ++i)
         {
             std::vector<int> arrCopy(arr);
