@@ -36,14 +36,14 @@ public:
     ItemType min() const;
 
     Array &operator=(const Array &other);
-    Array& operator=(Array&& other) noexcept;
+    Array &operator=(Array&& other) noexcept;
     const ItemType &operator[](const int index) const;
     ItemType &operator[](const int index);
 
     Array operator+(const ItemType &value) const;
-    Array operator+=(const ItemType &value);
+    Array &operator+=(const ItemType &value);
     Array operator+(const Array &other) const;
-    Array operator+=(const Array &other);
+    Array &operator+=(const Array &other);
 
     bool operator==(const Array &other) const;
     bool operator!=(const Array &other) const;
@@ -326,14 +326,14 @@ Array<ItemType> Array<ItemType>::operator+(const ItemType &value) const
 }
 
 template <typename ItemType>
-Array<ItemType> Array<ItemType>::operator+=(const ItemType &value)
+Array<ItemType> &Array<ItemType>::operator+=(const ItemType &value)
 {
     insert(m_size, value);
     return *this;
 }
 
 template <typename ItemType>
-Array<ItemType> Array<ItemType>::operator+=(const Array &other)
+Array<ItemType> &Array<ItemType>::operator+=(const Array &other)
 {
     Array sum(m_size + other.m_size);
     int i;
@@ -471,12 +471,7 @@ std::ostream &operator<<(std::ostream &out, const Array<T> &arr)
 template <typename T>
 std::istream& operator>>(std::istream &in, Array<T> &arr)
 {
-    if (arr.m_size < 0)
-    {
-         std::cerr << "Array::Array: size is negative, invert...\n";
-         arr.m_size = -arr.m_size;
-    }
-    for (int i = 0; i <arr.m_size; ++i)
+    for (int i = 0; i < arr.m_size; ++i)
     {
         in >> arr.m_array[i];
     }
