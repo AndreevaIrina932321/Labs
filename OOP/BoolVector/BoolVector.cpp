@@ -117,7 +117,7 @@ BoolVector &BoolVector::operator=(const BoolVector& other)
 	return *this;
 }
 
-bool BoolVector::operator[](int index)
+BoolVector::Rank BoolVector::operator[](int index)
 {
     assert(index >= 0 && index < m_length);
     return Rank(&m_cells[index / CellSize], _mask(index));
@@ -240,9 +240,22 @@ BoolVector::Rank::Rank(Cell *cell, Cell mask)
     assert(m_mask > 0);
 }
 
-BoolVector::Rank& BoolVector::Rank::operator=(bool value)
+BoolVector::Rank& BoolVector::Rank::operator=(const bool value)
 {
     if (value)
+    {
+        *m_cell |= m_mask;
+    }
+    else
+    {
+        *m_cell &= ~m_mask;
+    }
+    return *this;
+}
+
+BoolVector::Rank& BoolVector::Rank::operator=(const Rank &other)
+{
+    if (bool(other))
     {
         *m_cell |= m_mask;
     }
@@ -399,4 +412,107 @@ BoolVector BoolVector::operator~() const
     return result;
 }
 
+BoolVector::Rank BoolVector::Rank::operator&(const bool value) const
+{
+    Rank result = *this;
+    if (value)
+    {
+        *result.m_cell &= m_mask;
+    }
+    else
+    {
+        result = 0;
+    }
+    return result;
+}
 
+BoolVector::Rank BoolVector::Rank::operator&(const Rank &other) const
+{
+    Rank result = operator&(bool(other));
+    return result;
+}
+
+BoolVector::Rank BoolVector::Rank::operator|(const bool value) const
+{
+    Rank result = *this;
+    if (value)
+    {
+        result = 1;
+    }
+    return result;
+}
+
+BoolVector::Rank BoolVector::Rank::operator|(const Rank &other) const
+{
+    Rank result = operator|(bool(other));
+    return result;
+}
+
+BoolVector::Rank BoolVector::Rank::operator^(const bool value) const
+{
+    Rank result = *this;
+    result = value ^ bool(*this);
+    return result;
+}
+
+BoolVector::Rank BoolVector::Rank::operator^(const Rank &other) const
+{
+    Rank result = operator^(bool(other));
+    return result;
+}
+
+BoolVector::Rank &BoolVector::Rank::operator&=(const bool value)
+{
+    operator&(value).swap(*this);
+    return *this;
+}
+
+BoolVector::Rank &BoolVector::Rank::operator&=(const Rank &other)
+{
+    operator&(other).swap(*this);
+    return *this;
+}
+
+BoolVector::Rank &BoolVector::Rank::operator|=(const bool value)
+{
+    operator|(value).swap(*this);
+    return *this;
+}
+
+BoolVector::Rank &BoolVector::Rank::operator|=(const Rank &other)
+{
+    operator&(other).swap(*this);
+    return *this;
+}
+
+BoolVector::Rank &BoolVector::Rank::operator^=(const bool value)
+{
+    operator^(value).swap(*this);
+    return *this;
+}
+
+BoolVector::Rank &BoolVector::Rank::operator^=(const Rank &other)
+{
+    operator&(other).swap(*this);
+    return *this;
+}
+
+BoolVector::Rank BoolVector::Rank::operator~() const
+{
+    Rank result = *this;
+    if (bool(result))
+    {
+        result = 0;
+    }
+    else
+    {
+        result = 1;
+    }
+    return result;
+}
+
+void BoolVector::Rank::swap(Rank &other) noexcept
+{
+    std::swap(m_cell, other.m_cell);
+    std::swap(m_mask, other.m_mask);
+}

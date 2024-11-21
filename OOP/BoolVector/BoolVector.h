@@ -33,7 +33,7 @@ public:
 
 
 	BoolVector &operator=(const BoolVector &other);
-	bool operator[](int index);
+	Rank operator[](int index);
 	BoolVector operator&(const BoolVector &other) const;
 	BoolVector &operator&=(const BoolVector &other);
 	BoolVector operator|(const BoolVector &other) const;
@@ -61,8 +61,31 @@ class BoolVector::Rank
 public:
     Rank() = default;
     Rank(Cell* cell, Cell mask);
+
+    void swap(Rank &other) noexcept;
+
     Rank &operator=(const Rank &other);
-    Rank &operator=(bool value);
+    Rank &operator=(const bool value);
+
+    Rank operator&(const bool value) const;
+    Rank operator&(const Rank &other) const;
+
+    Rank operator|(const bool value) const;
+    Rank operator|(const Rank &other) const;
+
+    Rank operator^(const bool value) const;
+    Rank operator^(const Rank &other) const;
+
+    Rank &operator&=(const bool value);
+    Rank &operator&=(const Rank &other);
+
+    Rank &operator|=(const bool value);
+    Rank &operator|=(const Rank &other);
+
+    Rank &operator^=(const bool value);
+    Rank &operator^=(const Rank &other);
+
+    Rank operator~() const;
     operator bool() const;
 
 private:
