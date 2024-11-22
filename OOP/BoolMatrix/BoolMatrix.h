@@ -9,7 +9,7 @@ public:
     using Cell = unsigned char;
 	static const int CellSize = 8; // sizeof(Cell) * 8
 
-	BoolMatrix(const int columnCount = CellSize, const int rowsCount = CellSize, const bool value = false);
+	BoolMatrix(const int rowsCount = CellSize, const int columnCount = CellSize, const bool value = false);
 	BoolMatrix(char **sample, const int rowsCount, const int length);
 	BoolMatrix(const BoolMatrix &other);
 
@@ -41,7 +41,7 @@ public:
 	BoolMatrix &operator|=(const BoolMatrix &other);
 	BoolMatrix operator^(const BoolMatrix &other) const;
 	BoolMatrix &operator^=(const BoolMatrix &other);
-	BoolMatrix operator~() const;
+	BoolMatrix operator~();
 
 private:
 	static Cell _mask(int index);

@@ -4,13 +4,13 @@
 #include "/home/rin/Labs/OOP/BoolVector/BoolVector.cpp"
 #include "/home/rin/Labs/OOP/Array/Array.cpp"
 
-BoolMatrix::BoolMatrix(const int columnCount, const int rowsCount, const bool value)
+BoolMatrix::BoolMatrix(const int rowsCount, const int columnCount, const bool value)
 {
     assert(columnCount >= 0 && rowsCount >= 0);
     BoolVector sample(columnCount, value);
 	m_columnsCount = columnCount;
 	m_rowsCount = rowsCount;
-	m_rows = Array<BoolVector>(columnCount, sample);
+	m_rows = Array<BoolVector>(rowsCount, sample);
 }
 
 BoolMatrix::BoolMatrix(char **sample, const int rowsCount, const int length)
@@ -18,6 +18,7 @@ BoolMatrix::BoolMatrix(char **sample, const int rowsCount, const int length)
     assert(length >= 0 && rowsCount >= 0);
     m_columnsCount = length * CellSize;
     m_rowsCount = rowsCount;
+    m_rows = Array<BoolVector>(rowsCount);
     for (int i = 0; i < m_rowsCount; ++i)
     {
         BoolVector row(sample[i], length);
@@ -49,20 +50,6 @@ void BoolMatrix::print() const
 
 void BoolMatrix::input()
 {
-    std::cout << "Введите количество строк: ";
-    std::cin >> m_rowsCount;
-    if (m_rowsCount < 0)
-    {
-         std::cerr << "BoolMatrix::input(): rows number is negative, invert...\n";
-         m_rowsCount = -m_rowsCount;
-    }
-    std::cout << "Введите колиичество столбцов: ";
-    std::cin >> m_columnsCount;
-    if (m_columnsCount < 0)
-    {
-         std::cerr << "BoolMatrix::input(): columns number is negative, invert...\n";
-         m_columnsCount = -m_columnsCount;
-    }
     std::cout << "Введите булеву матрицу:" << std::endl;
     for (int i = 0; i < m_rowsCount; ++i)
     {
@@ -163,42 +150,104 @@ BoolVector BoolMatrix::operator[](int index)
 
 BoolMatrix BoolMatrix::operator&(const BoolMatrix &other) const
 {
-    BoolMatrix result();
+    int i = 0;
     if (m_rowsCount < other.m_rowsCount)
     {
-        for (int i = 0; i < m_rowsCount; ++i)
+        BoolMatrix result(other);
+        for (i = 0; i < m_rowsCount; ++i)
         {
-
+            result.m_rows[i] = m_rows[i] & other.m_rows[i];
         }
+        for (; i < other.m_rowsCount; ++i)
+        {
+            result.m_rows[i].setAll(false);
+        }
+        return result;
+    }
+    else
+    {
+        BoolMatrix result(*this);
+        for (i = 0; i < other.m_rowsCount; ++i)
+        {
+            result.m_rows[i] = m_rows[i] & other.m_rows[i];
+        }
+        for (; i < m_rowsCount; ++i)
+        {
+            result.m_rows[i].setAll(false);
+        }
+        return result;
     }
 }
 
 BoolMatrix &BoolMatrix::operator&=(const BoolMatrix &other)
 {
-
+    operator&(other).swap(*this);
+    return *this;
 }
 
 BoolMatrix BoolMatrix::operator|(const BoolMatrix &other) const
 {
-
+    int i;
+    if (m_rowsCount < other.m_rowsCount)
+    {
+        BoolMatrix result(other);
+        for (i = 0; i < m_rowsCount; ++i)
+        {
+            result.m_rows[i] = m_rows[i] | other.m_rows[i];
+        }
+        return result;
+    }
+    else
+    {
+        BoolMatrix result(*this);
+        for (i = 0; i < other.m_rowsCount; ++i)
+        {
+            result[i] = m_rows[i] | other.m_rows[i];
+        }
+        return result;
+    }
 }
 
 BoolMatrix &BoolMatrix::operator|=(const BoolMatrix &other)
 {
-
+    operator|(other).swap(*this);
+    return *this;
 }
 
 BoolMatrix BoolMatrix::operator^(const BoolMatrix &other) const
 {
-
+    int i;
+    if (m_rowsCount < other.m_rowsCount)
+    {
+        BoolMatrix result(other);
+        for (i = 0; i < m_rowsCount; ++i)
+        {
+            result.m_rows[i] = m_rows[i] ^ other.m_rows[i];
+        }
+        return result;
+    }
+    else
+    {
+        BoolMatrix result(*this);
+        for (i = 0; i < other.m_rowsCount; ++i)
+        {
+            result[i] = m_rows[i] ^ other.m_rows[i];
+        }
+        return result;
+    }
 }
 
 BoolMatrix &BoolMatrix::operator^=(const BoolMatrix &other)
 {
-
+    operator^(other).swap(*this);
+    return *this;
 }
 
-BoolMatrix BoolMatrix::operator~() const
+BoolMatrix BoolMatrix::operator~()
 {
-
+    for (int i = 0; i < m_rowsCount; ++i)
+    {
+        m_rows[i].invertAll();
+    }
+    return *this;
 }
