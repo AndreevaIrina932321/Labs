@@ -146,20 +146,6 @@ void BoolVector::print() const
 
 void BoolVector::input()
 {
-    std::cout << "Введите количество бит";
-    std::cin >> m_length;
-    if (m_length < 0)
-    {
-         std::cerr << "Array::Array: size is negative, invert...\n";
-         m_length = -m_length;
-    }
-    m_cellCount = m_length / CellSize;
-    if (m_length % CellSize != 0)
-	{
-		m_cellCount++;
-	}
-	delete [] m_cells;
-	m_cells = new Cell[m_cellCount];
 	std::cout << "Введите булев вектор: ";
 	bool value;
 	for (int i = 0; i < m_length; ++i)
@@ -240,7 +226,7 @@ BoolVector::Rank::Rank(Cell *cell, Cell mask)
     assert(m_mask > 0);
 }
 
-BoolVector::Rank& BoolVector::Rank::operator=(const bool value)
+BoolVector::Rank &BoolVector::Rank::operator=(const bool value)
 {
     if (value)
     {
@@ -255,14 +241,7 @@ BoolVector::Rank& BoolVector::Rank::operator=(const bool value)
 
 BoolVector::Rank& BoolVector::Rank::operator=(const Rank &other)
 {
-    if (bool(other))
-    {
-        *m_cell |= m_mask;
-    }
-    else
-    {
-        *m_cell &= ~m_mask;
-    }
+    operator=(bool(other)).swap(*this);
     return *this;
 }
 
@@ -273,38 +252,32 @@ BoolVector::Rank::operator bool() const
 
 BoolVector BoolVector::operator&(const BoolVector &other) const
 {
+    int i = m_length - 1, j = other.m_length - 1;
     BoolVector result(std::max(m_length, other.m_length));
-    int i;
-    for (i = 0; i < m_length; ++i)
+    if (m_length > other.m_length)
     {
-        result.setBitValue(i, bitValue(i) && other.bitValue(i));
+        for (i = m_length - 1, j = other.m_length - 1; j >= 0; --i, --j)
+        {
+            result.setBitValue(i, bitValue(i) && other.bitValue(j));
+        }
+        for (; i >= 0; --i)
+        {
+            result.setBitValue(i, false);
+        }
     }
-    for (; i < result.length(); ++i)
+    else
     {
-        result.setBitValue(i, false);
+        for (i = m_length - 1, j = other.m_length - 1; i >= 0; --i, --j)
+        {
+            result.setBitValue(j, bitValue(i) && other.bitValue(j));
+        }
+        for (; j >= 0; --j)
+        {
+            result.setBitValue(j, false);
+        }
     }
     return result;
 }
-
-/*BoolVector BoolVector::operator&(const BoolVector &other) const
-{
-    BoolVector result(std::max(m_length, other.m_length));
-    int i, minLength = std::min(m_length, other.m_length);
-    for (i = 0; i < minLength / CellSize; ++i)
-    {
-        result.m_cells[i] = m_cells[i] & other.m_cells[i];
-    }
-    i *= CellSize;
-    for (; i < minLength; ++i)
-    {
-         result.setBitValue(i, bitValue(i) && other.bitValue(i));
-    }
-    for (; i < result.m_length; ++i)
-    {
-        result.setBitValue(i, false);
-    }
-    return result;
-}*/
 
 BoolVector &BoolVector::operator&=(const BoolVector &other)
 {
@@ -314,15 +287,23 @@ BoolVector &BoolVector::operator&=(const BoolVector &other)
 
 BoolVector BoolVector::operator|(const BoolVector &other) const
 {
+    int i = m_length - 1, j = other.m_length - 1;
     BoolVector result(std::max(m_length, other.m_length));
-    int i = 0;
-    for (i = 0; i < m_length; ++i)
+    if (m_length > other.m_length)
     {
-        result.setBitValue(i, bitValue(i) || other.bitValue(i));
+        result = *this;
+        for (i = m_length - 1, j = other.m_length - 1; j >= 0; --i, --j)
+        {
+            result.setBitValue(i, bitValue(i) || other.bitValue(j));
+        }
     }
-    for (; i < result.length(); ++i)
+    else
     {
-        result.setBitValue(i, other.bitValue(i));
+        result = other;
+        for (i = m_length - 1, j = other.m_length - 1; i >= 0; --i, --j)
+        {
+            result.setBitValue(j, bitValue(i) || other.bitValue(j));
+        }
     }
     return result;
 }
@@ -335,15 +316,23 @@ BoolVector &BoolVector::operator|=(const BoolVector &other)
 
 BoolVector BoolVector::operator^(const BoolVector &other) const
 {
+    int i = m_length - 1, j = other.m_length - 1;
     BoolVector result(std::max(m_length, other.m_length));
-    int i = 0;
-    for (i = 0; i < m_length; ++i)
+    if (m_length > other.m_length)
     {
-        result.setBitValue(i, bitValue(i) ^ other.bitValue(i));
+        result = *this;
+        for (i = m_length - 1, j = other.m_length - 1; j >= 0; --i, --j)
+        {
+            result.setBitValue(i, bitValue(i) ^ other.bitValue(j));
+        }
     }
-    for (; i < result.length(); ++i)
+    else
     {
-        result.setBitValue(i, other.bitValue(i));
+        result = other;
+        for (i = m_length - 1, j = other.m_length - 1; i >= 0; --i, --j)
+        {
+            result.setBitValue(j, bitValue(i) ^ other.bitValue(j));
+        }
     }
     return result;
 }
@@ -412,104 +401,7 @@ BoolVector BoolVector::operator~() const
     return result;
 }
 
-BoolVector::Rank BoolVector::Rank::operator&(const bool value) const
-{
-    Rank result = *this;
-    if (value)
-    {
-        *result.m_cell &= m_mask;
-    }
-    else
-    {
-        result = 0;
-    }
-    return result;
-}
 
-BoolVector::Rank BoolVector::Rank::operator&(const Rank &other) const
-{
-    Rank result = operator&(bool(other));
-    return result;
-}
-
-BoolVector::Rank BoolVector::Rank::operator|(const bool value) const
-{
-    Rank result = *this;
-    if (value)
-    {
-        result = 1;
-    }
-    return result;
-}
-
-BoolVector::Rank BoolVector::Rank::operator|(const Rank &other) const
-{
-    Rank result = operator|(bool(other));
-    return result;
-}
-
-BoolVector::Rank BoolVector::Rank::operator^(const bool value) const
-{
-    Rank result = *this;
-    result = value ^ bool(*this);
-    return result;
-}
-
-BoolVector::Rank BoolVector::Rank::operator^(const Rank &other) const
-{
-    Rank result = operator^(bool(other));
-    return result;
-}
-
-BoolVector::Rank &BoolVector::Rank::operator&=(const bool value)
-{
-    operator&(value).swap(*this);
-    return *this;
-}
-
-BoolVector::Rank &BoolVector::Rank::operator&=(const Rank &other)
-{
-    operator&(other).swap(*this);
-    return *this;
-}
-
-BoolVector::Rank &BoolVector::Rank::operator|=(const bool value)
-{
-    operator|(value).swap(*this);
-    return *this;
-}
-
-BoolVector::Rank &BoolVector::Rank::operator|=(const Rank &other)
-{
-    operator&(other).swap(*this);
-    return *this;
-}
-
-BoolVector::Rank &BoolVector::Rank::operator^=(const bool value)
-{
-    operator^(value).swap(*this);
-    return *this;
-}
-
-BoolVector::Rank &BoolVector::Rank::operator^=(const Rank &other)
-{
-    operator&(other).swap(*this);
-    return *this;
-}
-
-BoolVector::Rank BoolVector::Rank::operator~() const
-{
-    Rank result = *this;
-    if (bool(result))
-    {
-        result = 0;
-    }
-    else
-    {
-        result = 1;
-    }
-    return result;
-}
 
 void BoolVector::Rank::swap(Rank &other) noexcept
 {

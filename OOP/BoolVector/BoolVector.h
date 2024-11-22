@@ -67,25 +67,6 @@ public:
     Rank &operator=(const Rank &other);
     Rank &operator=(const bool value);
 
-    Rank operator&(const bool value) const;
-    Rank operator&(const Rank &other) const;
-
-    Rank operator|(const bool value) const;
-    Rank operator|(const Rank &other) const;
-
-    Rank operator^(const bool value) const;
-    Rank operator^(const Rank &other) const;
-
-    Rank &operator&=(const bool value);
-    Rank &operator&=(const Rank &other);
-
-    Rank &operator|=(const bool value);
-    Rank &operator|=(const Rank &other);
-
-    Rank &operator^=(const bool value);
-    Rank &operator^=(const Rank &other);
-
-    Rank operator~() const;
     operator bool() const;
 
 private:
