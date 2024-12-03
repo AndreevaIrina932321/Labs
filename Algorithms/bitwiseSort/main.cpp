@@ -94,7 +94,6 @@ double getTimeOfSort(std::vector<int> &arr,const std::vector<int> &arrCopy, int 
 
 int main()
 {
-    saveArrays();
     std::ifstream fileIn("/home/rin/ForLabs/algorithms/ShellSort/arrays.txt", std::ios_base::in);
     std::vector<int> arr;
     arr.reserve(1000000);

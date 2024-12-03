@@ -16,12 +16,12 @@ void qSort(std::vector<int> &arr, int leftIndex, int rightIndex)
     {
         while (arr[i] < pivot)
         {
-            i++;
+            ++i;
         }
 
         while (arr[j] > pivot)
         {
-            j--;
+            --j;
         }
 
         if (i <= j)
