@@ -1,0 +1,47 @@
+#include <iostream>
+#include <algorithm>
+#include <iostream>
+#include <random>
+#include <string>
+#include <vector>
+#include "List.h"
+
+template <typename T>
+void printSearchResult(const List<T>& list, const T& value)
+{
+    std::cout << "list ";
+    auto it = std::find(list.begin(), list.end(), value);
+    if (it == list.end())
+    {
+        std::cout << "doesn't contain ";
+    }
+    else
+    {
+        std::cout << "contains ";
+    }
+    std::cout << "'" << value << "' value.\n";
+}
+
+
+int main()
+{
+    List<std::string> list;
+    list.append("aboba");
+    list.append("bobao");
+    list.append("pshh-pshh");
+    list.print();
+    std::vector<std::string> arr;
+    arr.resize(3, "aboba");
+    List<std::string> list1(list);
+    ++list.begin();
+    list1.print();
+    /*std::cout << "Введите элементы списка: ";
+    list1.input();*/
+    auto it = list1.searchElement("bobao");
+    list1.headInsert("boba");
+    list1.print();
+    auto it1 = list1.searchElement("pshh-pshh");
+    list1.eraseSequence(it, it1);
+    list1.print();
+    return 0;
+}
