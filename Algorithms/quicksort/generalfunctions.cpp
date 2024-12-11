@@ -65,20 +65,20 @@ bool isSorted(const std::vector<int> &arr)
 
 bool readArray(std::vector<int> &arr, std::ifstream &fileIn)
 {
-    bool isEmpty;
+    bool canRead = true;
     std::string line;
-    std::string number;
+    int number;
     arr.clear();
     if (fileIn.is_open()) //try catch
     {
-        isEmpty = static_cast<bool>(std::getline(fileIn, line));
+        canRead = static_cast<bool>(std::getline(fileIn, line));
         std::stringstream strStream(line);
-        while (std::getline(strStream, number, ' '))
+        while (strStream >> number)
         {
-            arr.push_back(atoi(number.c_str()));
+            arr.push_back(number);
         }
     }
-    return isEmpty;
+    return canRead;
 }
 
 void printArray(const std::vector<int> &arr)

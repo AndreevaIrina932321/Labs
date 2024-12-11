@@ -37,16 +37,12 @@ void qSort(std::vector<int> &arr, int leftIndex, int rightIndex)
 }
 
 
-double getTimeOfSort(std::vector<int> &arr,const std::vector<int> &arrCopy, int arrSize, int i)
+double getTimeOfSort(std::vector<int> arr, int arrSize)
 {
     auto start = std::chrono::high_resolution_clock::now();
     qSort(arr, 0, arr.size() - 1);
     auto end = std::chrono::high_resolution_clock::now();
     assert(isSorted(arr));
-    if (i != 2)
-    {
-        arr = arrCopy;
-    }
     std::chrono::duration<double> diff = end - start;
     return diff.count();
 }
@@ -56,16 +52,16 @@ int main()
     std::ifstream fileIn("/home/rin/ForLabs/algorithms/ShellSort/arrays.txt", std::ios_base::in);
     std::vector<int> arr;
     arr.reserve(1000000);
-    double averageTime = 0;
     int range = 10, outCounter = 1;
     while (readArray(arr, fileIn))
     {
         int i;
+        double averageTime = 0;
         for (i = 0; i < 3; ++i)
         {
-            std::vector<int> arrCopy(arr);
+
             int arrSize = arr.size();
-            averageTime += getTimeOfSort(arr, arrCopy, arrSize, i);
+            averageTime += getTimeOfSort(arr, arrSize);
         }
         std::cout << "Размер массива: [" << arr.size() << ']' << " Диапазон значений: -"
                   << range << '/' << range << std::endl;
