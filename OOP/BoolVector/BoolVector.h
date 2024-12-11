@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream>
 
 class BoolVector
 {
@@ -11,14 +11,14 @@ public:
 	static const int CellSize = 8; // sizeof(Cell) * 8
 
 	BoolVector(int length = CellSize);
-	BoolVector(int length, bool value);
+	BoolVector(int length, const bool value);
 	BoolVector(const char *sample, const int sampleSize);
 	BoolVector(const BoolVector &other);
 	~BoolVector();
 
     int length() const { return m_length; }
-    bool bitValue(int index) const;
-	void setBitValue(int index, bool value);
+    bool bitValue(const int index) const;
+	void setBitValue(const int index, const bool value);
 
     void swap(BoolVector &other) noexcept;
     void print() const;
@@ -33,7 +33,8 @@ public:
 
 
 	BoolVector &operator=(const BoolVector &other);
-	Rank operator[](int index);
+	Rank operator[](const int index);
+	const Rank operator[](const int index) const;
 	BoolVector operator&(const BoolVector &other) const;
 	BoolVector &operator&=(const BoolVector &other);
 	BoolVector operator|(const BoolVector &other) const;
@@ -45,6 +46,10 @@ public:
 	BoolVector operator>>(int position) const;
 	BoolVector &operator>>=(int position);
 	BoolVector operator~() const;
+
+	friend std::ostream& operator<<(std::ostream &out, const BoolVector &bv);
+    friend std::istream& operator>>(std::istream &in, BoolVector &bv);
+
 
 private:
 	int _excessRankCount() const;

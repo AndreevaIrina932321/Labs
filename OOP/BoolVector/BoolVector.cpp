@@ -15,7 +15,7 @@ BoolVector::BoolVector(int length)
 	m_cells = new Cell[m_cellCount];
 }
 
-BoolVector::BoolVector(int length, bool value)
+BoolVector::BoolVector(int length, const bool value)
 	: BoolVector(length)
 {
 	Cell sample = 0;
@@ -30,32 +30,18 @@ BoolVector::BoolVector(int length, bool value)
 
 }
 
-BoolVector::BoolVector(const char *arr, const int size)
+BoolVector::BoolVector(const char *sample, const int sampleSize)
+    : BoolVector(sample ? sampleSize : 0)
 {
-    assert(size >= 0);
-    if (arr == nullptr)
+    for (int i = 0; i < sampleSize; ++i)
     {
-        std::cerr << "BoolVector::BoolVector: can't create BoolVector from void array, BoolVector will be default...\n";
-        m_length = 0;
-        m_cells = nullptr;
-        m_cellCount = 0;
-    }
-    else
-    {
-        m_cellCount = size;
-        m_length = m_cellCount * CellSize;
-        m_cells = new Cell[m_cellCount];
-        for (int i = 0; i < size; ++i)
-        {
-            m_cells[i] = arr[i];
-        }
+        setBitValue(i, sample[i] - '0');
     }
 }
 
 BoolVector::BoolVector(const BoolVector &other)
-    : m_cellCount(other.m_cellCount), m_length(other.m_length)
+    : BoolVector(other.m_length)
 {
-    m_cells = new Cell[m_cellCount];
     for (int i = 0; i < m_cellCount; ++i)
     {
         m_cells[i] = other.m_cells[i];
@@ -67,14 +53,14 @@ BoolVector::~BoolVector()
 	delete[] m_cells;
 }
 
-bool BoolVector::bitValue(int index) const
+bool BoolVector::bitValue(const int index) const
 {
 	assert(index >= 0 && index < m_length);
 	Cell mask = _mask(index);
 	return m_cells[index / CellSize] & mask;
 }
 
-void BoolVector::setBitValue(int index, bool value)
+void BoolVector::setBitValue(const int index, const bool value)
 {
 	assert(index >= 0 && index < m_length);
 	Cell mask = _mask(index);
@@ -102,8 +88,9 @@ BoolVector &BoolVector::operator=(const BoolVector& other)
         return *this;
     }
 
-    if (m_length == other.m_length)
+    if (m_cellCount == other.m_cellCount)
     {
+        m_length = other.m_length;
         for (int i = 0; i < m_cellCount; ++i)
         {
             m_cells[i] = other.m_cells[i];
@@ -117,7 +104,13 @@ BoolVector &BoolVector::operator=(const BoolVector& other)
 	return *this;
 }
 
-BoolVector::Rank BoolVector::operator[](int index)
+BoolVector::Rank BoolVector::operator[](const int index)
+{
+    assert(index >= 0 && index < m_length);
+    return Rank(&m_cells[index / CellSize], _mask(index));
+}
+
+const BoolVector::Rank BoolVector::operator[](const int index) const
 {
     assert(index >= 0 && index < m_length);
     return Rank(&m_cells[index / CellSize], _mask(index));
@@ -167,7 +160,7 @@ bool BoolVector::invert(const int index)
 {
     if (index < 0 || index > m_length)
     {
-        std::cerr << "BoolVector::invert: incorrect index...\n";
+        std::cerr << "BoolVector::invert: incorrect index, no changes...\n";
         return false;
     }
     setBitValue(index, !bitValue(index));
@@ -179,12 +172,12 @@ void BoolVector::setBits(int index, int amount, bool value)
     assert(index >= m_length);
     if (index < 0)
     {
-        std::cerr << "BoolVector::setBits: incorrect index...\n";
+        std::cerr << "BoolVector::setBits: incorrect index, index will be 0...\n";
         index = 0;
     }
     if (index + amount >= m_length)
     {
-        std::cerr << "BoolVector::setBits: incorrect amount...\n";
+        std::cerr << "BoolVector::setBits: incorrect amount, all bits after the index will be equal to value...\n";
         amount = m_length - index - 1;
     }
     for (int i = index, j = 0; j < amount; ++i, ++j)
@@ -252,29 +245,11 @@ BoolVector::Rank::operator bool() const
 
 BoolVector BoolVector::operator&(const BoolVector &other) const
 {
-    int i = m_length - 1, j = other.m_length - 1;
-    BoolVector result(std::max(m_length, other.m_length));
-    if (m_length > other.m_length)
+    int minLength = std::min(m_length, other.m_length);
+    BoolVector result(std::max(m_length, other.m_length), false);
+    for (int i = 0; i < minLength; ++i)
     {
-        for (i = m_length - 1, j = other.m_length - 1; j >= 0; --i, --j)
-        {
-            result.setBitValue(i, bitValue(i) && other.bitValue(j));
-        }
-        for (; i >= 0; --i)
-        {
-            result.setBitValue(i, false);
-        }
-    }
-    else
-    {
-        for (i = m_length - 1, j = other.m_length - 1; i >= 0; --i, --j)
-        {
-            result.setBitValue(j, bitValue(i) && other.bitValue(j));
-        }
-        for (; j >= 0; --j)
-        {
-            result.setBitValue(j, false);
-        }
+        result.setBitValue(result.m_length - i - 1, bitValue(m_length - i - 1) && other.bitValue(other.m_length - i - 1));
     }
     return result;
 }
@@ -287,23 +262,15 @@ BoolVector &BoolVector::operator&=(const BoolVector &other)
 
 BoolVector BoolVector::operator|(const BoolVector &other) const
 {
-    int i = m_length - 1, j = other.m_length - 1;
-    BoolVector result(std::max(m_length, other.m_length));
-    if (m_length > other.m_length)
-    {
-        result = *this;
-        for (i = m_length - 1, j = other.m_length - 1; j >= 0; --i, --j)
-        {
-            result.setBitValue(i, bitValue(i) || other.bitValue(j));
-        }
-    }
-    else
+    int minLength = std::min(m_length, other.m_length);
+    BoolVector result(*this);
+    if (other.m_length > m_length)
     {
         result = other;
-        for (i = m_length - 1, j = other.m_length - 1; i >= 0; --i, --j)
-        {
-            result.setBitValue(j, bitValue(i) || other.bitValue(j));
-        }
+    }
+    for (int i = 0; i < minLength; ++i)
+    {
+        result.setBitValue(result.m_length - i - 1, bitValue(m_length - i - 1) || other.bitValue(other.m_length - i - 1));
     }
     return result;
 }
@@ -316,23 +283,15 @@ BoolVector &BoolVector::operator|=(const BoolVector &other)
 
 BoolVector BoolVector::operator^(const BoolVector &other) const
 {
-    int i = m_length - 1, j = other.m_length - 1;
-    BoolVector result(std::max(m_length, other.m_length));
-    if (m_length > other.m_length)
-    {
-        result = *this;
-        for (i = m_length - 1, j = other.m_length - 1; j >= 0; --i, --j)
-        {
-            result.setBitValue(i, bitValue(i) ^ other.bitValue(j));
-        }
-    }
-    else
+    int minLength = std::min(m_length, other.m_length);
+    BoolVector result(*this);
+    if (other.m_length > m_length)
     {
         result = other;
-        for (i = m_length - 1, j = other.m_length - 1; i >= 0; --i, --j)
-        {
-            result.setBitValue(j, bitValue(i) ^ other.bitValue(j));
-        }
+    }
+    for (int i = 0; i < minLength; ++i)
+    {
+        result.setBitValue(result.m_length - i - 1, bitValue(m_length - i - 1) ^ other.bitValue(other.m_length - i - 1));
     }
     return result;
 }
@@ -347,6 +306,13 @@ BoolVector BoolVector::operator<<(int position) const
 {
     BoolVector result(*this);
     int i;
+
+    if (position < 0)
+    {
+        std::cerr << "BoolVector::operator<<: negative shift value, will be inverted...\n";
+        position = -position;
+    }
+
     if (position >= m_length)
     {
         result.setAll(false);
@@ -372,6 +338,13 @@ BoolVector BoolVector::operator>>(int position) const
 {
     BoolVector result(*this);
     int i;
+
+    if (position < 0)
+    {
+        std::cerr << "BoolVector::operator>>: negative shift value, will be inverted...\n";
+        position = -position;
+    }
+
     if (position >= m_length)
     {
         result.setAll(false);
@@ -407,4 +380,34 @@ void BoolVector::Rank::swap(Rank &other) noexcept
 {
     std::swap(m_cell, other.m_cell);
     std::swap(m_mask, other.m_mask);
+}
+
+std::istream& operator>>(std::istream &in, BoolVector &bv)
+{
+    bool value;
+    for (int i = 0; i < bv.m_length; ++i)
+    {
+        in >> value;
+        bv.setBitValue(i, value);
+    }
+
+    return in;
+}
+
+std::ostream &operator<<(std::ostream &out, const BoolVector &bv)
+{
+    if (bv.m_length == 0)
+    {
+        out << "boolean vector is empty\n";
+    }
+    else
+    {
+        out << '[';
+        for (int i = 0; i < bv.m_length - 1; ++i)
+        {
+            out << bv.bitValue(i) << ", ";
+        }
+        out << bv.bitValue(bv.m_length - 1) << "]\n";
+    }
+    return out;
 }
