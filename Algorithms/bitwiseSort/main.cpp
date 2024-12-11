@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <algorithm>
 #include <vector>
 #include <fstream>
 #include <assert.h>
@@ -10,6 +11,16 @@ bool getBit(const int k, int sample)
     int mask = 1;
     mask = mask << k;
     return mask & sample;
+}
+
+int getEldestBit(const std::vector<int> &arr)
+{
+    int i = 30, maxValue = *(std::max_element(arr.begin(), arr.end()));
+    while(!getBit(i, maxValue))
+    {
+        --i;
+    }
+    return i;
 }
 
 void preSort(std::vector<int> &arr, int &pLeftIndex, int &pRightIndex, int &nLeftIndex, int &nRightIndex)
@@ -70,24 +81,20 @@ void bSort(std::vector<int> &arr, int leftIndex, int rightIndex, int k)
     bSort(arr, i, rightIndex, k - 1);
 }
 
-void bitwiseSort(std::vector<int> &arr)
+void bitwiseSort(std::vector<int> &arr, int eldestBit)
 {
     int pLeftIndex, pRightIndex, nLeftIndex, nRightIndex;
     preSort(arr, pLeftIndex, pRightIndex, nLeftIndex, nRightIndex);
-    bSort(arr, pLeftIndex, pRightIndex, 16);
-    bSort(arr, nLeftIndex, nRightIndex, 16);
+    bSort(arr, pLeftIndex, pRightIndex, eldestBit);
+    bSort(arr, nLeftIndex, nRightIndex, eldestBit);
 }
 
-double getTimeOfSort(std::vector<int> &arr,const std::vector<int> &arrCopy, int arrSize, int i)
+double getTimeOfSort(std::vector<int> &arr, int arrSize, int eldestBit)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    bitwiseSort(arr);
+    bitwiseSort(arr, eldestBit);
     auto end = std::chrono::high_resolution_clock::now();
     assert(isSorted(arr));
-    if (i != 2)
-    {
-        arr = arrCopy;
-    }
     std::chrono::duration<double> diff = end - start;
     return diff.count();
 }
@@ -97,16 +104,15 @@ int main()
     std::ifstream fileIn("/home/rin/ForLabs/algorithms/ShellSort/arrays.txt", std::ios_base::in);
     std::vector<int> arr;
     arr.reserve(1000000);
-    double averageTime = 0;
     int range = 10, outCounter = 1;
     while (readArray(arr, fileIn))
     {
-        int i;
+        int i, eldestBit = getEldestBit(arr);
+        double averageTime = 0;
         for (i = 0; i < 3; ++i)
         {
-            std::vector<int> arrCopy(arr);
             int arrSize = arr.size();
-            averageTime += getTimeOfSort(arr, arrCopy, arrSize, i);
+            averageTime += getTimeOfSort(arr, arrSize, eldestBit);
         }
         std::cout << "Размер массива: [" << arr.size() << ']' << " Диапазон значений: -"
                   << range << '/' << range << std::endl;
