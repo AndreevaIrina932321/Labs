@@ -33,15 +33,18 @@ int main()
     std::vector<std::string> arr;
     arr.resize(3, "aboba");
     List<std::string> list1(list);
-    ++list.begin();
+    list1.append("gogo");
+    list1.append("momo");
     list1.print();
+    std::cout << list1.min();
     /*std::cout << "Введите элементы списка: ";
     list1.input();*/
     auto it = list1.searchElement("bobao");
-    list1.headInsert("boba");
-    list1.print();
-    auto it1 = list1.searchElement("pshh-pshh");
+    auto it1 = list1.searchElement("gogo");
     list1.eraseSequence(it, it1);
+    list1.print();
+    list1 += list;
+    list1.sort();
     list1.print();
     return 0;
 }

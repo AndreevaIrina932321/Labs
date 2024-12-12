@@ -2,11 +2,14 @@
 
 #include <iostream>
 #include <vector>
+#include <assert.h>
 #include <algorithm>
 
 
 //Обдумать реализацию перехода к следущему элементу, обдумать возвращаемый индекс для вставок и удаления
 // написать присваивание или конструктор из итератора/ проверить реализацию по стандартам;
+// добавить assert cerr
+// загадка потерянного [0] в конкатенации
 
 
 template <typename T>
@@ -41,7 +44,7 @@ public:
 
 	iterator searchElement(const T &value);
 	iterator headInsert(const T &value);
-	iterator insertBefore(const T &value);
+	iterator insertBeforeValue(const T &sampleValue, const T &value);
 	iterator insert(int position, const T &value);
 	iterator insert(iterator position, const T &value);
 
@@ -60,13 +63,16 @@ public:
 - удаление диапазона элементов с помощью итераторов;
 - поиск максимального/минимального элемента;
 - сортировка списка;
-
-Необходимые перегрузки:
-- присваивание (=);
-- получение ссылки на ключ элемента ([ ]);
-- сравнение (==, !=);
-- сложение (конкатенация) списков (+, +=).
 	*/
+	List &operator=(const List &other);
+	const T &operator[](const int index) const;
+    T &operator[](const int index);
+    bool operator==(const List &other) const;
+    bool operator!=(const List &other) const;
+    List operator+(const T &value) const;
+    List &operator+=(const T &value);
+    List operator+(const List &other) const;
+    List &operator+=(const List &other);
 
 private:
 	int m_size = 0;
@@ -129,11 +135,8 @@ List<T>::List()
 
 template <typename T>
 List<T>::List(const std::vector<T> &arr)
-    : m_head(new Node())
-    , m_tail(new Node())
+    : List()
 {
-    m_head->next = m_tail;
-	m_tail->prev = m_head;
     for (int i = 0; i < arr.size(); ++i)
     {
         append(arr[i]);
@@ -142,12 +145,8 @@ List<T>::List(const std::vector<T> &arr)
 
 template <typename T>
 List<T>::List(const List<T> &other)
-    : m_size(other.m_size)
-    , m_head(new Node())
-    , m_tail(new Node())
+    : List()
 {
-    m_head->next = m_tail;
-	m_tail->prev = m_head;
     for (const T& value : other)
     {
         append(value);
@@ -228,6 +227,10 @@ void List<T>::print() const
     {
         std::cout << value << ' ';
     }
+    if (!m_size)
+    {
+        std::cout << "List is empty";
+    }
     std::cout << "\n";
 }
 
@@ -277,10 +280,11 @@ typename List<T>::iterator List<T>::insert(iterator position, const T &value)
     {
         ++it;
     }*/
+
     if (position == end())
     {
         append(value);
-        return position;
+        return end();
     }
     Node* node = new Node(value, position.getNode(), position.getNode()->prev);
     position.getNode()->prev->next = node;
@@ -296,13 +300,14 @@ typename List<T>::iterator List<T>::headInsert(const T &value)
 }
 
 template <typename T>
-typename List<T>::iterator List<T>::insertBefore(const T &value)
+typename List<T>::iterator List<T>::insertBeforeValue(const T &sampleValue, const T &value)
 {
-    iterator it = searchElement(value);
+    iterator it = searchElement(sampleValue);
     if (it.getNode() == nullptr)
     {
+        std::cerr << "List::insertBeforeValue: can't find value, element will be append...\n";
         append(value);
-        return it;
+        return end();
     }
     return insert(it, value);
 }
@@ -335,10 +340,12 @@ typename List<T>::iterator List<T>::erase(iterator position)
     {
         return position;
     }
+    Node *node = position.getNode();
     position.getNode()->prev->next = position.getNode()->next;
-    position.getNode()->next = position.getNode()->prev;
+    position.getNode()->next->prev = position.getNode()->prev;
+    ++position;
+    delete node;
     --m_size;
-    delete position.getNode();
     return position;
 }
 
@@ -388,14 +395,14 @@ void List<T>::eraseSequence(iterator left, iterator right)
     {
         ++it;
     }
-    /*if (it == end()) //Обдумать реализацию перехода к следущему элементу, обдумать возвращаемый индекс для вставок и удаления
+    if (it == end()) //Обдумать реализацию перехода к следущему элементу, обдумать возвращаемый индекс для вставок и удаления
     {
         it = right;
         while (it != left)
         {
-            erase(it);
-            ++it;
+            it = erase(it);
         }
+        erase(it);
     }
     else
     {
@@ -404,14 +411,160 @@ void List<T>::eraseSequence(iterator left, iterator right)
         {
             it = erase(it);
         }
-    }*/
+        erase(it);
+    }
 }
 
-/*template <typename T>
+template <typename T>
 T List<T>::max() const
 {
+    T max = operator[](0);
+    for (int i = 1; i < m_size; ++i)
+    {
+        if (max < operator[](i))
+        {
+            max = operator[](i);
+        }
+    }
+    return max;
+}
 
-}*/
+template <typename T>
+T List<T>::min() const
+{
+    //T min = std::min_element(begin(), end());
+    T min = operator[](0);
+    for (int i = 1; i < m_size; ++i)
+    {
+        if (min > operator[](i))
+        {
+            min = operator[](i);
+        }
+    }
+    return min;
+}
+
+template <typename T>
+void List<T>::sort()
+{
+    T temp;
+    int j;
+    for (int i = 1; i < m_size; i++)
+    {
+        temp = operator[](i);
+        for(j = i - 1; j >= 0 && operator[](j) > temp; j--)
+        {
+            operator[](j + 1) = operator[](j);
+        }
+        operator[](j + 1) = temp;
+    }
+}
+
+template <typename T>
+List<T> &List<T>::operator=(const List &other)
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+
+    if (m_size == other.m_size)
+    {
+        for (int i = 0; i < m_size; ++i)
+        {
+           operator[](i) = other[i];
+        }
+    }
+    else
+    {
+        List listCopy(other);
+        swap(listCopy);
+    }
+    return *this;
+}
+
+template <typename T>
+const T &List<T>::operator[](const int index) const
+{
+    assert(index >= 0 && index < m_size);
+    auto it = begin();
+    for (int i = 0; i <= index; ++i)
+    {
+        ++it;
+    }
+    return *it;
+}
+
+template <typename T>
+T &List<T>::operator[](const int index)
+{
+    assert(index >= 0 && index < m_size);
+    auto it = begin();
+    for (int i = 0; i < index; ++i)
+    {
+        ++it;
+    }
+    return *it;
+}
+
+template <typename T>
+bool List<T>::operator==(const List &other) const
+{
+    if (m_size != other.m_size)
+    {
+        return false;
+    }
+    for (int i = 0; i < m_size; ++i)
+    {
+        if (operator[](i) != other[i])
+            {
+                return false;
+            }
+    }
+    return true;
+}
+
+template <typename T>
+bool List<T>::operator!=(const List &other) const
+{
+    return (!operator==(other));
+}
+
+template <typename T>
+List<T> List<T>::operator+(const T &value) const
+{
+    List sum(*this);
+    sum.append(value);
+    return sum;
+}
+
+template <typename T>
+List<T> &List<T>::operator+=(const T &value)
+{
+    append(value);
+    return *this;
+}
+
+template <typename T>
+List<T> &List<T>::operator+=(const List &other)
+{
+    List sum(*this);
+    sum.append(*other.begin());
+    for (int i = 0; i < other.m_size; ++i)
+    {
+        sum.append(other[i]);
+    }
+    swap(sum);
+    return *this;
+}
+
+template <typename T>
+List<T> List<T>::operator+(const List &other) const
+{
+    List sum(*this);
+    sum += (other);
+    return sum;
+}
 
 template <typename T>
 List<T>::Node::Node(Node* next, Node* prev)
