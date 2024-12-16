@@ -43,8 +43,8 @@ public:
 	BoolMatrix &operator^=(const BoolMatrix &other);
 	BoolMatrix operator~();
 
-private:
-	static Cell _mask(int index);
+	friend std::ostream& operator<<(std::ostream &out, const BoolMatrix &bm);
+    friend std::istream& operator>>(std::istream &in, BoolMatrix &bm);
 
 private:
 	int m_columnsCount = 0;

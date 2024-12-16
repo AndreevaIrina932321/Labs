@@ -16,7 +16,7 @@ BoolMatrix::BoolMatrix(const int rowsCount, const int columnCount, const bool va
 BoolMatrix::BoolMatrix(char **sample, const int rowsCount, const int length)
 {
     assert(length >= 0 && rowsCount >= 0);
-    m_columnsCount = length * CellSize;
+    m_columnsCount = length;
     m_rowsCount = rowsCount;
     m_rows = Array<BoolVector>(rowsCount);
     for (int i = 0; i < m_rowsCount; ++i)
@@ -150,33 +150,18 @@ BoolVector BoolMatrix::operator[](int index)
 
 BoolMatrix BoolMatrix::operator&(const BoolMatrix &other) const
 {
-    int i = 0;
-    if (m_rowsCount < other.m_rowsCount)
+    int i = 0, minRowsCounter = std::min(m_rowsCount, other.m_rowsCount);
+    int maxRowsCounter = std::max(m_rowsCount, other.m_rowsCount);
+    BoolMatrix result(maxRowsCounter, m_columnsCount);
+    for (i = 0; i < minRowsCounter; ++i)
     {
-        BoolMatrix result(other);
-        for (i = 0; i < m_rowsCount; ++i)
-        {
-            result.m_rows[i] = m_rows[i] & other.m_rows[i];
-        }
-        for (; i < other.m_rowsCount; ++i)
-        {
-            result.m_rows[i].setAll(false);
-        }
-        return result;
+        result.m_rows[i] = m_rows[i] & other.m_rows[i];
     }
-    else
+    for (; i < maxRowsCounter; ++i)
     {
-        BoolMatrix result(*this);
-        for (i = 0; i < other.m_rowsCount; ++i)
-        {
-            result.m_rows[i] = m_rows[i] & other.m_rows[i];
-        }
-        for (; i < m_rowsCount; ++i)
-        {
-            result.m_rows[i].setAll(false);
-        }
-        return result;
+        result.m_rows[i].setAll(false);
     }
+    return result;
 }
 
 BoolMatrix &BoolMatrix::operator&=(const BoolMatrix &other)
@@ -187,25 +172,14 @@ BoolMatrix &BoolMatrix::operator&=(const BoolMatrix &other)
 
 BoolMatrix BoolMatrix::operator|(const BoolMatrix &other) const
 {
-    int i;
-    if (m_rowsCount < other.m_rowsCount)
+    int i, minRowsCounter = std::min(m_rowsCount, other.m_rowsCount);
+    BoolMatrix result(other);
+    result = m_rowsCount < other.m_rowsCount ? other : *this;
+    for (i = 0; i < minRowsCounter; ++i)
     {
-        BoolMatrix result(other);
-        for (i = 0; i < m_rowsCount; ++i)
-        {
-            result.m_rows[i] = m_rows[i] | other.m_rows[i];
-        }
-        return result;
+        result.m_rows[i] = m_rows[i] | other.m_rows[i];
     }
-    else
-    {
-        BoolMatrix result(*this);
-        for (i = 0; i < other.m_rowsCount; ++i)
-        {
-            result[i] = m_rows[i] | other.m_rows[i];
-        }
-        return result;
-    }
+    return result;
 }
 
 BoolMatrix &BoolMatrix::operator|=(const BoolMatrix &other)
@@ -216,25 +190,14 @@ BoolMatrix &BoolMatrix::operator|=(const BoolMatrix &other)
 
 BoolMatrix BoolMatrix::operator^(const BoolMatrix &other) const
 {
-    int i;
-    if (m_rowsCount < other.m_rowsCount)
+    int i, minRowsCounter = std::min(m_rowsCount, other.m_rowsCount);
+    BoolMatrix result(other);
+    result = m_rowsCount < other.m_rowsCount ? other : *this;
+    for (i = 0; i < minRowsCounter; ++i)
     {
-        BoolMatrix result(other);
-        for (i = 0; i < m_rowsCount; ++i)
-        {
-            result.m_rows[i] = m_rows[i] ^ other.m_rows[i];
-        }
-        return result;
+        result.m_rows[i] = m_rows[i] ^ other.m_rows[i];
     }
-    else
-    {
-        BoolMatrix result(*this);
-        for (i = 0; i < other.m_rowsCount; ++i)
-        {
-            result[i] = m_rows[i] ^ other.m_rows[i];
-        }
-        return result;
-    }
+    return result;
 }
 
 BoolMatrix &BoolMatrix::operator^=(const BoolMatrix &other)
@@ -250,4 +213,32 @@ BoolMatrix BoolMatrix::operator~()
         m_rows[i].invertAll();
     }
     return *this;
+}
+
+std::ostream& operator<<(std::ostream &out, const BoolMatrix &bm)
+{
+    if (!bm.m_rowsCount)
+    {
+        out << "boolean matrix is empty\n";
+    }
+
+    else
+    {
+         out << "[\n";
+        for (int i = 0; i < bm.m_rowsCount; ++i)
+        {
+            out << bm.m_rows[i];
+        }
+        out << "]\n";
+    }
+    return out;
+}
+
+std::istream& operator>>(std::istream &in, BoolMatrix &bm)
+{
+    for (int i = 0; i < bm.m_rowsCount; ++i)
+    {
+        in >> bm.m_rows[i];
+    }
+    return in;
 }
