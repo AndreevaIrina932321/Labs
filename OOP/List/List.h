@@ -63,6 +63,11 @@ public:
     List operator+(const List &other) const;
     List &operator+=(const List &other);
 
+    template <typename ItemType>
+    friend std::ostream& operator<<(std::ostream &out, const List<ItemType> &arr);
+    template <typename ItemType>
+    friend std::istream& operator>>(std::istream &in, List<ItemType> &arr);
+
 private:
 	int m_size = 0;
 	Node* m_head = nullptr;
@@ -355,6 +360,7 @@ typename List<T>::iterator List<T>::erase(int position)
 {
     if (position >= m_size)
     {
+        std::cerr << "List::erase: wrong index, no changes...";
         return end();
     }
     iterator it = begin();
@@ -646,4 +652,29 @@ template <typename ItemType>
 bool List<T>::TemplateIterator<ItemType>::operator!=(const TemplateIterator& other) const
 {
     return (m_node != other.m_node);
+}
+
+template <typename ItemType>
+std::ostream &operator<<(std::ostream &out, const List<ItemType> &list)
+{
+    for (const ItemType& value : list)
+    {
+        out << value << ' ';
+    }
+    if (!list.m_size)
+    {
+        out << "List is empty";
+    }
+    out << "\n";
+    return out;
+}
+
+template <typename ItemType>
+std::istream& operator>>(std::istream &in, List<ItemType> &list)
+{
+    for (ItemType& value : list)
+    {
+        in >> value;
+    }
+    return in;
 }
