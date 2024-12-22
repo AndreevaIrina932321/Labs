@@ -6,12 +6,6 @@
 #include <algorithm>
 
 
-//Обдумать реализацию перехода к следущему элементу, обдумать возвращаемый индекс для вставок и удаления
-// написать присваивание или конструктор из итератора/ проверить реализацию по стандартам;
-// добавить assert cerr
-// загадка потерянного [0] в конкатенации
-
-
 template <typename T>
 class List
 {
@@ -59,11 +53,6 @@ public:
 	T min() const;
 	void sort();
 
-	/*
-- удаление диапазона элементов с помощью итераторов;
-- поиск максимального/минимального элемента;
-- сортировка списка;
-	*/
 	List &operator=(const List &other);
 	const T &operator[](const int index) const;
     T &operator[](const int index);
@@ -116,12 +105,9 @@ public:
     bool operator==(const TemplateIterator& other) const;
     bool operator!=(const TemplateIterator& other) const;
 
-    // написать присваивание или конструктор из итератора/ проверить реализацию по стандартам;
-
 protected:
     Node* m_node = nullptr;
 };
-
 
 
 template <typename T>
@@ -275,16 +261,17 @@ typename List<T>::iterator List<T>::searchElement(const T &value)
 template <typename T>
 typename List<T>::iterator List<T>::insert(iterator position, const T &value)
 {
-    /*iterator it = begin();
-    while (it != position && it != end())
-    {
-        ++it;
-    }*/
-
     if (position == end())
     {
         append(value);
         return end();
+    }
+    iterator it = position;
+    for (int i = 0; it != end() && i < m_size; ++it, ++i) {}
+    if (it != end())
+    {
+        std::cerr << "List::insert: wrong iterator, no changes...\n";
+        return position;
     }
     Node* node = new Node(value, position.getNode(), position.getNode()->prev);
     position.getNode()->prev->next = node;
@@ -331,13 +318,15 @@ typename List<T>::iterator List<T>::insert(int position, const T &value)
 template <typename T>
 typename List<T>::iterator List<T>::erase(iterator position)
 {
-    /*iterator it = begin();
-    while (it != position && it != end())
-    {
-        ++it;
-    }*/
     if (position == end())
     {
+        return position;
+    }
+    iterator it = position;
+    for (int i = 0; it != end() && i < m_size; ++it, ++i) {}
+    if (it != end())
+    {
+        std::cerr << "List:erase: wrong iterator, no changes...\n";
         return position;
     }
     Node *node = position.getNode();
@@ -395,8 +384,9 @@ void List<T>::eraseSequence(iterator left, iterator right)
     {
         ++it;
     }
-    if (it == end()) //Обдумать реализацию перехода к следущему элементу, обдумать возвращаемый индекс для вставок и удаления
+    if (it == end())
     {
+
         it = right;
         while (it != left)
         {
@@ -432,7 +422,6 @@ T List<T>::max() const
 template <typename T>
 T List<T>::min() const
 {
-    //T min = std::min_element(begin(), end());
     T min = operator[](0);
     for (int i = 1; i < m_size; ++i)
     {

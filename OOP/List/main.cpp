@@ -41,7 +41,7 @@ int main()
     list1.input();*/
     auto it = list1.searchElement("bobao");
     auto it1 = list1.searchElement("gogo");
-    list1.eraseSequence(it, it1);
+    list.erase(it);
     list1.print();
     list1 += list;
     list1.sort();
