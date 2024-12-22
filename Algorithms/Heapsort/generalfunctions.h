@@ -7,3 +7,4 @@ void writeArray(int *arr, int sizeOfArray, std::ofstream &file);
 void saveArrays();
 bool isSorted(const std::vector<int> &arr);
 bool readArray(std::vector<int> &arr, std::ifstream &fileIn);
+void printArray(const std::vector<int> &arr);
