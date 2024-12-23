@@ -252,15 +252,7 @@ bool List<T>::isEmpty() const
 template <typename T>
 typename List<T>::iterator List<T>::searchElement(const T &value)
 {
-    auto it = std::find(begin(), end(), value);
-    if (it == end())
-    {
-        return iterator(nullptr);
-    }
-    else
-    {
-        return it;
-    }
+    return std::find(begin(), end(), value);
 }
 
 template <typename T>
@@ -295,11 +287,9 @@ template <typename T>
 typename List<T>::iterator List<T>::insertBeforeValue(const T &sampleValue, const T &value)
 {
     iterator it = searchElement(sampleValue);
-    if (it.getNode() == nullptr)
+    if (it.getNode() == end())
     {
         std::cerr << "List::insertBeforeValue: can't find value, element will be append...\n";
-        append(value);
-        return end();
     }
     return insert(it, value);
 }
@@ -310,7 +300,7 @@ typename List<T>::iterator List<T>::insert(int position, const T &value)
     if (position >= m_size)
     {
         append(value);
-        return --end();
+        return insert(end(), value);
     }
     iterator it = begin();
     for (int i = 0; i < position; ++i)
@@ -323,7 +313,7 @@ typename List<T>::iterator List<T>::insert(int position, const T &value)
 template <typename T>
 typename List<T>::iterator List<T>::erase(iterator position)
 {
-    if (position == end())
+    if (isEmpty() || position == end())
     {
         return position;
     }
@@ -352,6 +342,7 @@ typename List<T>::iterator List<T>::headErase()
 template <typename T>
 typename List<T>::iterator List<T>::tailErase()
 {
+    assert(m_size > 0);
     return erase(--end());
 }
 
@@ -414,6 +405,7 @@ void List<T>::eraseSequence(iterator left, iterator right)
 template <typename T>
 T List<T>::max() const
 {
+    assert(m_size > 0);
     T max = operator[](0);
     for (int i = 1; i < m_size; ++i)
     {
@@ -428,6 +420,7 @@ T List<T>::max() const
 template <typename T>
 T List<T>::min() const
 {
+    assert(m_size > 0);
     T min = operator[](0);
     for (int i = 1; i < m_size; ++i)
     {
@@ -442,6 +435,7 @@ T List<T>::min() const
 template <typename T>
 void List<T>::sort()
 {
+    assert(m_size > 0);
     T temp;
     int j;
     for (int i = 1; i < m_size; i++)
