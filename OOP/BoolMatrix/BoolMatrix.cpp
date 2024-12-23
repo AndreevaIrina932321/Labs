@@ -1,8 +1,8 @@
 #include <assert.h>
 #include <iostream>
 #include "BoolMatrix.h"
-#include "/home/rin/Labs/OOP/BoolVector/BoolVector.cpp"
-#include "/home/rin/Labs/OOP/Array/Array.cpp"
+#include "../BoolVector/BoolVector.cpp"
+#include "../Array/Array.cpp"
 
 BoolMatrix::BoolMatrix(const int rowsCount, const int columnCount, const bool value)
 {
