@@ -1,11 +1,12 @@
 #pragma once
 
-#include "/home/rin/Labs/OOP/BoolVector/BoolVector.h"
+#include "../BoolVector/BoolVector.h"
 
 class Set : public BoolVector
 {
 public:
-    static const int maxSize = 256;
+    static const int maxSize = 58;
+    static const int firstEnabledSymbol = 65;
 
     Set(const char *sample, const int sampleSize);
     Set(const Set &other);

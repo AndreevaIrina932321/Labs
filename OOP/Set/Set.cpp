@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <iostream>
 #include "Set.h"
-#include "/home/rin/Labs/OOP/BoolVector/BoolVector.cpp"
+#include "../BoolVector/BoolVector.cpp"
 
 Set::Set(const char *sample, const int sampleSize)
     :BoolVector(maxSize, false)
@@ -9,7 +9,7 @@ Set::Set(const char *sample, const int sampleSize)
     assert(sampleSize >= 0 && sample != nullptr);
     for (int i = 0; i < sampleSize; ++i)
     {
-        setBitValue(static_cast<Cell>(sample[i]), true);
+        setBitValue(static_cast<Cell>(sample[i]) - firstEnabledSymbol, true);
     }
 }
 
@@ -23,26 +23,25 @@ Set::Set(const BoolVector &bv)
 
 Set::~Set()
 {
-    ~BoolVector();
 }
 
 bool Set::inSet(const char value) const
 {
-    return bitValue(static_cast<Cell>(value));
+    return bitValue(static_cast<Cell>(value) - firstEnabledSymbol);
 }
 
 char Set::min() const
 {
     int i;
-    for (i = 0; !bitValue(i); ++i) {}
-    return static_cast<Cell>(i);
+    for (i = 0; !bitValue(i); ++i);
+    return static_cast<Cell>(i + firstEnabledSymbol);
 }
 
 char Set::max() const
 {
     int i;
-    for (i = maxSize - 1; !bitValue(i); --i) {}
-    return static_cast<Cell>(i);
+    for (i = maxSize - 1; !bitValue(i); --i);
+    return static_cast<Cell>(i + firstEnabledSymbol);
 }
 
 int Set::size() const
@@ -59,7 +58,7 @@ Set &Set::operator=(const Set &other)
 bool Set::operator==(const Set &other) const
 {
     int i;
-    for (i = 0; i < maxSize && bitValue(i) == other.bitValue(i); ++i) {}
+    for (i = 0; i < maxSize && bitValue(i) == other.bitValue(i); ++i);
     return i == maxSize;
 }
 
@@ -92,10 +91,7 @@ Set &Set::operator|=(const Set &other)
 
 Set Set::operator/(const Set &other) const
 {
-    Set result(*this);
-    result &= other;
-    ~result;
-    return result &= *this;
+    return *this & ~other;
 }
 
 Set &Set::operator/=(const Set &other)
@@ -106,8 +102,8 @@ Set &Set::operator/=(const Set &other)
 
 Set Set::operator~() const
 {
-    BoolVector::operator~();
-    return *this;
+    Set result = BoolVector::operator~();
+    return result;
 }
 
 Set &Set::operator+=(const char value)
@@ -121,7 +117,7 @@ Set Set::operator+(const char value) const
     Set result(*this);
     if (!result.inSet(value))
     {
-        result.setBitValue(static_cast<unsigned int>(value), true);
+        result.setBitValue(static_cast<unsigned int>(value) - firstEnabledSymbol, true);
     }
     return result;
 }
@@ -137,7 +133,7 @@ Set Set::operator-(const char value) const
     Set result(*this);
     if (result.inSet(value))
     {
-        result.setBitValue(static_cast<unsigned int>(value), false);
+        result.setBitValue(static_cast<unsigned int>(value) - firstEnabledSymbol, false);
     }
     else
     {
@@ -153,7 +149,7 @@ std::ostream& operator<<(std::ostream &out, const Set &set)
     {
         if (set.bitValue(i))
         {
-            unsigned char a(i);
+            unsigned char a(i + 65);
             out << "'" << a << "' ";
         }
     }
@@ -168,7 +164,8 @@ std::istream& operator>>(std::istream &in, Set &set)
     while (i < set.size())
     {
         in >> a;
-        set.BoolVector::setBitValue(static_cast<unsigned char>(a), true);
+        assert(a >= 65 && a <= 122);
+        set.BoolVector::setBitValue(static_cast<unsigned char>(a - 65), true);
         ++i;
     }
     return in;
