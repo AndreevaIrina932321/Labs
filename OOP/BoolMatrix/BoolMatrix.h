@@ -1,6 +1,6 @@
 #pragma once
-#include "/home/rin/Labs/OOP/BoolVector/BoolVector.h"
-#include "/home/rin/Labs/OOP/Array/Array.h"
+#include "../BoolVector/BoolVector.h"
+#include "../Array/Array.h"
 
 class BoolMatrix
 {
@@ -23,6 +23,7 @@ public:
 
     int getWeight() const;
     int rowWeight(int rowIndex) const;
+    int collumnWeight(int collumnIndex) const;
 
     BoolVector rowsConjunction() const;
     BoolVector rowsDisjunction() const;
@@ -34,14 +35,15 @@ public:
     void invertSequence(const int rowIndex, const int columnIndex, const int amount);
 
 	BoolMatrix &operator=(const BoolMatrix &other);
-	BoolVector operator[](int index);
+	BoolVector &operator[](int index);
+	const BoolVector &operator[](const int index) const;
 	BoolMatrix operator&(const BoolMatrix &other) const;
 	BoolMatrix &operator&=(const BoolMatrix &other);
 	BoolMatrix operator|(const BoolMatrix &other) const;
 	BoolMatrix &operator|=(const BoolMatrix &other);
 	BoolMatrix operator^(const BoolMatrix &other) const;
 	BoolMatrix &operator^=(const BoolMatrix &other);
-	BoolMatrix operator~();
+	BoolMatrix operator~() const;
 
 	friend std::ostream& operator<<(std::ostream &out, const BoolMatrix &bm);
     friend std::istream& operator>>(std::istream &in, BoolMatrix &bm);
