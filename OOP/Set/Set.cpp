@@ -9,6 +9,7 @@ Set::Set(const char *sample, const int sampleSize)
     assert(sampleSize >= 0 && sample != nullptr);
     for (int i = 0; i < sampleSize; ++i)
     {
+        assert(sample[i] >= firstEnabledSymbol && sample[i] <= 122);
         setBitValue(static_cast<Cell>(sample[i]) - firstEnabledSymbol, true);
     }
 }
