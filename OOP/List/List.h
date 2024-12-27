@@ -477,7 +477,7 @@ const T &List<T>::operator[](const int index) const
 {
     assert(index >= 0 && index < m_size);
     auto it = begin();
-    for (int i = 0; i <= index; ++i)
+    for (int i = 0; i < index; ++i)
     {
         ++it;
     }
