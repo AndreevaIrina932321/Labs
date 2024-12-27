@@ -7,7 +7,7 @@
 
 void heapify(std::vector<int> &arr, int arrSize, int i)
 {
-    int j, currentVal = arr[0];
+    int j, currentVal = arr[i];
     bool wasShifted = true;
     j = i * 2 + 1;
     currentVal  = arr[i];
