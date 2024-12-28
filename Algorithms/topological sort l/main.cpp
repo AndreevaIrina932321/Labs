@@ -74,7 +74,7 @@ void printGraph(const List<Leader*>& graph)
     }
 }
 
-bool sort(const List<Leader*>& graph, std::vector<int> &result)
+bool sort(List<Leader*>& graph, std::vector<int> &result)
 {
     List<Leader*> newGraph;
     for (int i = 0; i < graph.size(); ++i)
