@@ -3,14 +3,14 @@
 #include "generalfunctions.h"
 #include "/home/rin/Labs/OOP/BoolVector/BoolVector.h"
 
-bool isTSorted(std::vector<int> &result, BoolMatrix &matrix, const int vertexNumber)
+bool tSort(std::vector<int> &result, BoolMatrix &matrix, const int vertexAmount)
 {
-    BoolVector definedVertexes(vertexNumber, false), noAncestorVertexes(vertexNumber, false);
-    for (int j = 0; j < vertexNumber && definedVertexes.getWeight() != definedVertexes.length(); ++j)
+    BoolVector definedVertexes(vertexAmount, false), noAncestorVertexes(vertexAmount, false);
+    for (int j = 0; j < vertexAmount && definedVertexes.getWeight() != definedVertexes.length(); ++j)
     {
         noAncestorVertexes = ~definedVertexes & ~matrix.rowsDisjunction();
         definedVertexes |= noAncestorVertexes;
-        for (int i = 0; i < vertexNumber; ++i)
+        for (int i = 0; i < vertexAmount; ++i)
         {
             if(noAncestorVertexes.bitValue(i))
             {
@@ -24,16 +24,16 @@ bool isTSorted(std::vector<int> &result, BoolMatrix &matrix, const int vertexNum
 
 int main()
 {
-    int vertexNumber = 7;
-    BoolMatrix matrix = createMatrix(vertexNumber);
+    int vertexAmount = 7;
+    BoolMatrix matrix = createMatrix(vertexAmount);
     std::vector<int> result;
-    if (!isTSorted(result, matrix, vertexNumber))
+    if (!tSort(result, matrix, vertexAmount))
     {
         std::cout << "Graph has cycle, no answer\n";
     }
     else
     {
-        for (int i = 0; i < vertexNumber; ++i)
+        for (int i = 0; i < vertexAmount; ++i)
         {
             std::cout << result[i];
         }

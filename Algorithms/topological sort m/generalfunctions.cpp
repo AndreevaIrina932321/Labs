@@ -1,9 +1,9 @@
 #include "generalfunctions.h"
 #include "/home/rin/Labs/OOP/BoolMatrix/BoolMatrix.cpp"
 
-BoolMatrix createMatrix(const int vertexNumber)
+BoolMatrix createMatrix(const int vertexAmount)
 {
-    BoolMatrix matrix(vertexNumber, vertexNumber, false);
+    BoolMatrix matrix(vertexAmount, vertexAmount, false);
     matrix.setBit(1, 0, true);
     matrix.setBit(3, 4, true);
     matrix.setBit(4, 0, true);
